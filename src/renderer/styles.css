@@ -477,6 +477,34 @@ body {
   color: var(--accent);
 }
 
+/* 전역 메모 탭 */
+#memo-view {
+  flex: 1 1 auto;
+  display: flex;
+  padding: 6px;
+  min-height: 0;
+}
+#memo-view.hidden {
+  display: none;
+}
+#memo-text {
+  flex: 1 1 auto;
+  width: 100%;
+  resize: none;
+  padding: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.6;
+  outline: none;
+  font-family: 'MesloLGS NF', Menlo, 'SF Mono', Monaco, monospace;
+}
+#memo-text:focus {
+  border-color: var(--accent);
+}
+
 .ssh-item {
   padding: 8px 10px;
   margin-bottom: 4px;

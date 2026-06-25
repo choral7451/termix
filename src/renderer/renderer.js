@@ -922,6 +922,8 @@ document.getElementById('new-tab').addEventListener('click', () => {
 const sshPanel = document.getElementById('ssh-panel');
 const sshList = document.getElementById('ssh-list');
 const promptListEl = document.getElementById('prompt-list');
+const memoView = document.getElementById('memo-view');
+const sshAddBtn = document.getElementById('ssh-add');
 
 // 접속 항목: { id, name, command, password }
 let connections = [];
@@ -944,12 +946,15 @@ function toggleSsh(force) {
   refitActive(); // 패널 토글로 터미널 폭이 바뀌므로 다시 맞춘다.
 }
 
-// 패널 탭 전환(SSH / 프롬프트)
+// 패널 탭 전환(SSH / 프롬프트 / 메모)
 function selectPanelTab(tab) {
   activePanelTab = tab;
   document.querySelectorAll('.panel-tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
   sshList.classList.toggle('hidden', tab !== 'ssh');
   promptListEl.classList.toggle('hidden', tab !== 'prompt');
+  memoView.classList.toggle('hidden', tab !== 'memo');
+  // 메모 탭에는 추가(+) 버튼이 의미 없으므로 숨긴다.
+  sshAddBtn.style.display = tab === 'memo' ? 'none' : '';
 }
 
 document.querySelectorAll('.panel-tab').forEach((b) => {
@@ -1189,6 +1194,33 @@ promptModalOverlay.addEventListener('keydown', (e) => {
   }
 });
 
+// ===== 전역 메모 (자유 텍스트, 자동 저장) =====
+const memoText = document.getElementById('memo-text');
+let memoSaveTimer = null;
+
+function scheduleMemoSave() {
+  if (memoSaveTimer) clearTimeout(memoSaveTimer);
+  memoSaveTimer = setTimeout(() => {
+    window.termix.saveMemo({ text: memoText.value });
+    memoSaveTimer = null;
+  }, 400); // 입력이 멈춘 뒤 잠깐 후 저장(디바운스)
+}
+
+memoText.addEventListener('input', scheduleMemoSave);
+// 메모 입력 중 Cmd/Ctrl 단축키가 터미널 동작(세션 닫기 등)으로 새지 않게 막는다.
+// (단, Cmd/Ctrl+O 는 패널 토글로 살려둔다)
+memoText.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key !== 'o') e.stopPropagation();
+});
+// 패널을 닫거나 포커스를 잃을 때 즉시 저장(디바운스 대기분 반영)
+memoText.addEventListener('blur', () => {
+  if (memoSaveTimer) {
+    clearTimeout(memoSaveTimer);
+    memoSaveTimer = null;
+  }
+  window.termix.saveMemo({ text: memoText.value });
+});
+
 window.addEventListener('resize', () => refitVisible());
 
 // ===== 터미널 텍스트 검색 (Cmd/Ctrl+F) =====
@@ -1394,6 +1426,12 @@ async function checkForUpdate() {
     }
   } catch (_) {}
   renderPrompts();
+
+  // 저장된 메모 복원
+  try {
+    const m = await window.termix.loadMemo();
+    if (m && typeof m.text === 'string') memoText.value = m.text;
+  } catch (_) {}
 
   // 자체 인라인 추천용 명령어 히스토리 시드(셸 히스토리)
   try {

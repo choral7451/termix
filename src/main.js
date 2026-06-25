@@ -179,6 +179,23 @@ ipcMain.on('prompts:save', (_event, list) => {
   } catch (_) {}
 });
 
+// --- 전역 메모(자유 텍스트) 저장/불러오기 ---
+const memoFile = () => path.join(app.getPath('userData'), 'memo.json');
+
+ipcMain.handle('memo:load', () => {
+  try {
+    return JSON.parse(fs.readFileSync(memoFile(), 'utf8'));
+  } catch (_) {
+    return { text: '' };
+  }
+});
+
+ipcMain.on('memo:save', (_event, data) => {
+  try {
+    fs.writeFileSync(memoFile(), JSON.stringify(data));
+  } catch (_) {}
+});
+
 // --- 명령어 히스토리(자체 인라인 추천용) ---
 ipcMain.handle('history:commands', () => {
   const home = os.homedir();

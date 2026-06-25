@@ -37,8 +37,9 @@
     <div id="ssh-panel" class="hidden">
       <div id="ssh-header">
         <div class="panel-tabs">
-          <button class="panel-tab active" data-tab="ssh">SSH 접속</button>
+          <button class="panel-tab active" data-tab="ssh">SSH</button>
           <button class="panel-tab" data-tab="prompt">프롬프트</button>
+          <button class="panel-tab" data-tab="memo">메모</button>
         </div>
         <div class="ssh-header-btns">
           <button id="ssh-add" title="추가">+</button>
@@ -47,6 +48,9 @@
       </div>
       <div id="ssh-list"></div>
       <div id="prompt-list" class="hidden"></div>
+      <div id="memo-view" class="hidden">
+        <textarea id="memo-text" placeholder="자유롭게 메모하세요. 자동 저장됩니다." spellcheck="false"></textarea>
+      </div>
     </div>
 
     <div id="update-banner" class="hidden">

@@ -10,6 +10,8 @@ contextBridge.exposeInMainWorld('termix', {
   saveConnections: (list) => ipcRenderer.send('connections:save', list),
   loadPrompts: () => ipcRenderer.invoke('prompts:load'),
   savePrompts: (list) => ipcRenderer.send('prompts:save', list),
+  loadMemo: () => ipcRenderer.invoke('memo:load'),
+  saveMemo: (data) => ipcRenderer.send('memo:save', data),
   loadHistory: () => ipcRenderer.invoke('history:commands'),
   checkUpdate: () => ipcRenderer.invoke('update:check'),
   openExternal: (url) => ipcRenderer.send('open:external', url),

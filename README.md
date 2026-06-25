@@ -17,6 +17,18 @@
 
 > ⚠️ SSH 비밀번호는 이 컴퓨터의 사용자 데이터 폴더에 **평문**으로 저장된다. 가능하면 SSH 키 인증을 권장한다.
 
+## 다운로드 (완성된 앱)
+
+빌드 없이 바로 쓰려면 [**Releases**](https://github.com/choral7451/termix/releases/latest) 에서 `Termix-macOS-arm64.zip` 을 받으면 된다 (Apple Silicon 전용).
+
+1. 압축 해제 후 `Termix.app` 을 **응용 프로그램** 폴더로 드래그
+2. 서명되지 않은 앱이라 처음엔 Gatekeeper 가 막는다 → **우클릭 → 열기**, 또는:
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/Termix.app
+   ```
+
+> Intel Mac 은 아래 소스에서 빌드한다.
+
 ## 실행 (개발)
 
 ```bash

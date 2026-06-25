@@ -1,6 +1,6 @@
 {
   "name": "termix",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "멀티 세션 터미널 데스크탑 앱 (cmux-like)",
   "main": "src/main.js",
   "author": "termix",

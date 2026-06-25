@@ -1535,6 +1535,12 @@ async function checkForUpdate() {
     selectProject(proj.id);
   }
 
+  // 사이드바 하단 버전 표시
+  try {
+    const v = await window.termix.getVersion();
+    if (v) document.getElementById('app-version').textContent = `v${v}`;
+  } catch (_) {}
+
   // 시작 후 백그라운드로 새 버전 확인(실패해도 조용히 무시)
   checkForUpdate();
 })();

@@ -265,6 +265,8 @@ ipcMain.handle('update:check', async () => {
   return { current: app.getVersion(), latest };
 });
 
+ipcMain.handle('app:version', () => app.getVersion());
+
 // --- 외부 링크 열기(기본 브라우저) ---
 ipcMain.on('open:external', (_event, url) => {
   if (typeof url === 'string' && /^https:\/\//.test(url)) shell.openExternal(url);

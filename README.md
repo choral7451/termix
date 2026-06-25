@@ -22,10 +22,14 @@
 빌드 없이 바로 쓰려면 [**Releases**](https://github.com/choral7451/termix/releases/latest) 에서 `Termix-macOS-arm64.zip` 을 받으면 된다 (Apple Silicon 전용).
 
 1. 압축 해제 후 `Termix.app` 을 **응용 프로그램** 폴더로 드래그
-2. 서명되지 않은 앱이라 처음엔 Gatekeeper 가 막는다 → **우클릭 → 열기**, 또는:
+2. 서명되지 않은 앱이라, 처음 실행하면 **"'Termix'은(는) 손상되었기 때문에 열 수 없습니다"** 경고가 뜬다.
+   이건 실제 손상이 아니라 macOS 격리(quarantine) 때문이며, **터미널에서 아래 한 줄**로 해제한다
+   (이 경고는 우클릭 → 열기로는 풀리지 않는다):
    ```bash
    xattr -dr com.apple.quarantine /Applications/Termix.app
    ```
+   (앱을 다른 곳에 뒀다면 그 경로로 바꾼다. 예: `~/Downloads/Termix.app`)
+3. 이후로는 그냥 더블클릭으로 실행된다.
 
 > Intel Mac 은 아래 소스에서 빌드한다.
 

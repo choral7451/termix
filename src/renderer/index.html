@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';"
+    />
+    <title>Termix</title>
+    <link rel="stylesheet" href="../../node_modules/@xterm/xterm/css/xterm.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="sidebar">
+      <div id="sidebar-header">
+        <span class="brand">Termix</span>
+        <button id="new-project" title="새 프로젝트">+</button>
+      </div>
+      <div id="projects"></div>
+    </div>
+
+    <div id="main">
+      <div id="tabbar">
+        <div id="tabs"></div>
+        <button id="new-tab" title="새 세션 (Cmd/Ctrl+T)">+</button>
+      </div>
+      <div id="terminals"></div>
+      <div id="search-bar" class="hidden">
+        <input id="search-input" type="text" placeholder="검색…" autocomplete="off" spellcheck="false" />
+        <span id="search-count">0/0</span>
+        <button id="search-prev" title="이전 (Shift+Enter)">↑</button>
+        <button id="search-next" title="다음 (Enter)">↓</button>
+        <button id="search-close" title="닫기 (Esc)">×</button>
+      </div>
+    </div>
+
+    <div id="ssh-panel" class="hidden">
+      <div id="ssh-header">
+        <div class="panel-tabs">
+          <button class="panel-tab active" data-tab="ssh">SSH 접속</button>
+          <button class="panel-tab" data-tab="prompt">프롬프트</button>
+        </div>
+        <div class="ssh-header-btns">
+          <button id="ssh-add" title="추가">+</button>
+          <button id="ssh-close" title="닫기 (Cmd/Ctrl+O)">×</button>
+        </div>
+      </div>
+      <div id="ssh-list"></div>
+      <div id="prompt-list" class="hidden"></div>
+    </div>
+
+    <div id="modal-overlay" class="hidden">
+      <div id="modal">
+        <div class="modal-title">SSH 접속</div>
+        <label class="modal-field">
+          <span>접속 이름</span>
+          <input id="m-name" type="text" placeholder="예: 운영 서버" autocomplete="off" />
+        </label>
+        <label class="modal-field">
+          <span>명령어</span>
+          <input id="m-cmd" type="text" placeholder="예: ssh ubuntu@1.2.3.4 -p 22" autocomplete="off" />
+        </label>
+        <label class="modal-field">
+          <span>비밀번호 (선택)</span>
+          <input id="m-pw" type="password" placeholder="필요 시 입력 — 프롬프트에서 자동 입력" autocomplete="off" />
+        </label>
+        <div class="modal-hint">⚠ 비밀번호는 이 컴퓨터에 평문으로 저장됩니다. 가능하면 SSH 키 인증을 권장합니다.</div>
+        <div class="modal-actions">
+          <button id="m-cancel">취소</button>
+          <button id="m-save" class="primary">저장</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="prompt-modal-overlay" class="hidden">
+      <div id="prompt-modal">
+        <div class="modal-title">프롬프트</div>
+        <label class="modal-field">
+          <span>이름</span>
+          <input id="p-name" type="text" placeholder="예: 코드 리뷰 요청" autocomplete="off" />
+        </label>
+        <label class="modal-field">
+          <span>프롬프트 내용</span>
+          <textarea id="p-content" rows="7" placeholder="선택 시 터미널에 입력될 텍스트"></textarea>
+        </label>
+        <label class="modal-check">
+          <input id="p-send" type="checkbox" />
+          <span>선택 시 바로 실행 (Enter 자동 입력)</span>
+        </label>
+        <div class="modal-actions">
+          <button id="p-cancel">취소</button>
+          <button id="p-save" class="primary">저장</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="../../node_modules/@xterm/xterm/lib/xterm.js"></script>
+    <script src="../../node_modules/@xterm/addon-fit/lib/addon-fit.js"></script>
+    <script src="../../node_modules/@xterm/addon-web-links/lib/addon-web-links.js"></script>
+    <script src="../../node_modules/@xterm/addon-search/lib/addon-search.js"></script>
+    <script src="renderer.js"></script>
+  </body>
+</html>

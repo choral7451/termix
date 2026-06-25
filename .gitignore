@@ -1,0 +1,16 @@
+# 의존성 (npm install 로 복원)
+node_modules/
+
+# 빌드 산출물
+dist/
+out/
+
+# 로컬 Claude Code 설정 (개인 경로·권한 포함)
+.claude/
+
+# macOS
+.DS_Store
+
+# 로그·임시
+*.log
+npm-debug.log*

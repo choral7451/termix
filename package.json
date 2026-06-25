@@ -1,0 +1,48 @@
+{
+  "name": "termix",
+  "version": "0.1.0",
+  "description": "멀티 세션 터미널 데스크탑 앱 (cmux-like)",
+  "main": "src/main.js",
+  "author": "termix",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "rebuild": "electron-rebuild -f -w node-pty",
+    "postinstall": "electron-rebuild -f -w node-pty",
+    "dist": "electron-builder --mac --arm64",
+    "deploy": "bash scripts/deploy.sh"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^3.6.0",
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/addon-search": "^0.15.0",
+    "@xterm/addon-web-links": "^0.11.0",
+    "@xterm/xterm": "^5.5.0",
+    "node-pty": "^1.0.0"
+  },
+  "build": {
+    "appId": "com.termix.app",
+    "productName": "Termix",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "node_modules/node-pty/**/*"
+    ],
+    "mac": {
+      "target": "dir",
+      "category": "public.app-category.developer-tools",
+      "icon": "build/icon.icns",
+      "identity": null
+    }
+  }
+}

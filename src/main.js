@@ -227,27 +227,26 @@ ipcMain.handle('history:commands', () => {
 });
 
 // --- 업데이트 확인 (GitHub Releases 최신 버전) ---
+// api.github.com 은 비인증 60회/시간 레이트 리밋이 있어, 레이트 리밋이 없는
+// releases.atom 피드(공개 페이지)를 파싱한다. 가장 최근 릴리스가 첫 entry 이며,
+// 각 entry 의 링크가 .../releases/tag/<TAG> 형태라 거기서 태그를 뽑는다.
 function fetchLatestRelease() {
   return new Promise((resolve) => {
     const req = https.request(
       {
-        hostname: 'api.github.com',
-        path: `/repos/${REPO}/releases/latest`,
+        hostname: 'github.com',
+        path: `/${REPO}/releases.atom`,
         method: 'GET',
-        headers: { 'User-Agent': 'Termix-Updater', Accept: 'application/vnd.github+json' },
+        headers: { 'User-Agent': 'Termix-Updater', Accept: 'application/atom+xml' },
         timeout: 8000,
       },
       (res) => {
         let data = '';
         res.on('data', (c) => (data += c));
         res.on('end', () => {
-          try {
-            const json = JSON.parse(data);
-            if (json && json.tag_name) resolve({ tag: json.tag_name, url: json.html_url });
-            else resolve(null);
-          } catch (_) {
-            resolve(null);
-          }
+          const m = data.match(/\/releases\/tag\/([^"<]+)/);
+          if (m) resolve({ tag: m[1], url: `https://github.com/${REPO}/releases/tag/${m[1]}` });
+          else resolve(null);
         });
       }
     );

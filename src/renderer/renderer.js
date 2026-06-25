@@ -922,8 +922,7 @@ document.getElementById('new-tab').addEventListener('click', () => {
 const sshPanel = document.getElementById('ssh-panel');
 const sshList = document.getElementById('ssh-list');
 const promptListEl = document.getElementById('prompt-list');
-const memoView = document.getElementById('memo-view');
-const sshAddBtn = document.getElementById('ssh-add');
+const memoListEl = document.getElementById('memo-list');
 
 // 접속 항목: { id, name, command, password }
 let connections = [];
@@ -952,9 +951,7 @@ function selectPanelTab(tab) {
   document.querySelectorAll('.panel-tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
   sshList.classList.toggle('hidden', tab !== 'ssh');
   promptListEl.classList.toggle('hidden', tab !== 'prompt');
-  memoView.classList.toggle('hidden', tab !== 'memo');
-  // 메모 탭에는 추가(+) 버튼이 의미 없으므로 숨긴다.
-  sshAddBtn.style.display = tab === 'memo' ? 'none' : '';
+  memoListEl.classList.toggle('hidden', tab !== 'memo');
 }
 
 document.querySelectorAll('.panel-tab').forEach((b) => {
@@ -1022,6 +1019,7 @@ function deleteConnection(id) {
 document.getElementById('ssh-close').addEventListener('click', () => toggleSsh(false));
 document.getElementById('ssh-add').addEventListener('click', () => {
   if (activePanelTab === 'prompt') openPromptModal(null);
+  else if (activePanelTab === 'memo') openMemoModal(null);
   else openConnModal(null);
 });
 
@@ -1194,31 +1192,100 @@ promptModalOverlay.addEventListener('keydown', (e) => {
   }
 });
 
-// ===== 전역 메모 (자유 텍스트, 자동 저장) =====
-const memoText = document.getElementById('memo-text');
-let memoSaveTimer = null;
+// ===== 메모 목록 (제목 + 내용, 프롬프트와 동일한 방식) =====
+// 메모 항목: { id, title, content }
+let memos = [];
+let memoCounter = 0;
 
-function scheduleMemoSave() {
-  if (memoSaveTimer) clearTimeout(memoSaveTimer);
-  memoSaveTimer = setTimeout(() => {
-    window.termix.saveMemo({ text: memoText.value });
-    memoSaveTimer = null;
-  }, 400); // 입력이 멈춘 뒤 잠깐 후 저장(디바운스)
+function persistMemos() {
+  window.termix.saveMemo(memos);
 }
 
-memoText.addEventListener('input', scheduleMemoSave);
-// 메모 입력 중 Cmd/Ctrl 단축키가 터미널 동작(세션 닫기 등)으로 새지 않게 막는다.
-// (단, Cmd/Ctrl+O 는 패널 토글로 살려둔다)
-memoText.addEventListener('keydown', (e) => {
-  if ((e.metaKey || e.ctrlKey) && e.key !== 'o') e.stopPropagation();
-});
-// 패널을 닫거나 포커스를 잃을 때 즉시 저장(디바운스 대기분 반영)
-memoText.addEventListener('blur', () => {
-  if (memoSaveTimer) {
-    clearTimeout(memoSaveTimer);
-    memoSaveTimer = null;
+function renderMemos() {
+  memoListEl.innerHTML = '';
+  if (!memos.length) {
+    memoListEl.innerHTML =
+      '<div class="ssh-empty">저장된 메모가 없습니다.<br>위 + 버튼으로 메모를 추가하세요.</div>';
+    return;
   }
-  window.termix.saveMemo({ text: memoText.value });
+  memos.forEach((m) => {
+    const el = document.createElement('div');
+    el.className = 'ssh-item memo-item';
+    el.title = '클릭하여 보기/편집';
+    const preview = (m.content || '').replace(/\s+/g, ' ').trim();
+    el.innerHTML = `<div class="ssh-name">${escapeHtml(m.title || preview || '(제목 없음)')}</div>
+      <div class="ssh-cmd">${escapeHtml(preview)}</div>`;
+    el.addEventListener('click', () => openMemoModal(m));
+    el.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      showContextMenu(e.clientX, e.clientY, [
+        { label: '편집', action: () => openMemoModal(m) },
+        { sep: true },
+        { label: '삭제', danger: true, action: () => deleteMemo(m.id) },
+      ]);
+    });
+    memoListEl.appendChild(el);
+  });
+}
+
+function deleteMemo(id) {
+  memos = memos.filter((m) => m.id !== id);
+  persistMemos();
+  renderMemos();
+}
+
+// ===== 메모 추가/편집 모달 =====
+const memoModalOverlay = document.getElementById('memo-modal-overlay');
+const memoMName = document.getElementById('memo-m-name');
+const memoMContent = document.getElementById('memo-m-content');
+let editingMemo = null;
+
+function openMemoModal(m) {
+  editingMemo = m;
+  memoMName.value = m ? m.title || '' : '';
+  memoMContent.value = m ? m.content || '' : '';
+  memoModalOverlay.classList.remove('hidden');
+  setTimeout(() => memoMName.focus(), 0);
+}
+
+function closeMemoModal() {
+  memoModalOverlay.classList.add('hidden');
+  editingMemo = null;
+}
+
+function saveMemoModal() {
+  const title = memoMName.value.trim();
+  const content = memoMContent.value;
+  if (!title && !content.trim()) {
+    memoMName.focus();
+    return;
+  }
+  const fallbackTitle = title || content.trim().slice(0, 40);
+  if (editingMemo) {
+    editingMemo.title = fallbackTitle;
+    editingMemo.content = content;
+  } else {
+    memos.push({ id: `mo${++memoCounter}`, title: fallbackTitle, content });
+  }
+  persistMemos();
+  renderMemos();
+  closeMemoModal();
+}
+
+document.getElementById('memo-m-save').addEventListener('click', saveMemoModal);
+document.getElementById('memo-m-cancel').addEventListener('click', closeMemoModal);
+memoModalOverlay.addEventListener('mousedown', (e) => {
+  if (e.target === memoModalOverlay) closeMemoModal();
+});
+memoModalOverlay.addEventListener('keydown', (e) => {
+  // 내용이 여러 줄이라 Enter 는 줄바꿈, 저장은 Cmd/Ctrl+Enter.
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+    e.preventDefault();
+    saveMemoModal();
+  } else if (e.key === 'Escape') {
+    e.preventDefault();
+    closeMemoModal();
+  }
 });
 
 window.addEventListener('resize', () => refitVisible());
@@ -1336,6 +1403,7 @@ window.addEventListener('keydown', (e) => {
   // 모달 입력 중에는 단축키 무시
   if (!modalOverlay.classList.contains('hidden')) return;
   if (!promptModalOverlay.classList.contains('hidden')) return;
+  if (!memoModalOverlay.classList.contains('hidden')) return;
   const mod = e.metaKey || e.ctrlKey;
   if (!mod) return;
   if (e.key === 'o') {
@@ -1427,11 +1495,20 @@ async function checkForUpdate() {
   } catch (_) {}
   renderPrompts();
 
-  // 저장된 메모 복원
+  // 저장된 메모 복원 (구버전 단일 텍스트 {text} 는 항목 1개로 변환)
   try {
     const m = await window.termix.loadMemo();
-    if (m && typeof m.text === 'string') memoText.value = m.text;
+    if (Array.isArray(m)) {
+      memos = m;
+    } else if (m && typeof m.text === 'string' && m.text.trim()) {
+      memos = [{ id: 'mo1', title: '메모', content: m.text }];
+    }
+    memos.forEach((x) => {
+      const n = parseInt(String(x.id).replace(/^mo/, ''), 10);
+      if (!isNaN(n) && n > memoCounter) memoCounter = n;
+    });
   } catch (_) {}
+  renderMemos();
 
   // 자체 인라인 추천용 명령어 히스토리 시드(셸 히스토리)
   try {

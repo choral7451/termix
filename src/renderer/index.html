@@ -48,8 +48,24 @@
       </div>
       <div id="ssh-list"></div>
       <div id="prompt-list" class="hidden"></div>
-      <div id="memo-view" class="hidden">
-        <textarea id="memo-text" placeholder="자유롭게 메모하세요. 자동 저장됩니다." spellcheck="false"></textarea>
+      <div id="memo-list" class="hidden"></div>
+    </div>
+
+    <div id="memo-modal-overlay" class="hidden">
+      <div id="memo-modal">
+        <div class="modal-title">메모</div>
+        <label class="modal-field">
+          <span>제목</span>
+          <input id="memo-m-name" type="text" placeholder="예: 배포 절차" autocomplete="off" />
+        </label>
+        <label class="modal-field">
+          <span>내용</span>
+          <textarea id="memo-m-content" rows="8" placeholder="메모 내용"></textarea>
+        </label>
+        <div class="modal-actions">
+          <button id="memo-m-cancel">취소</button>
+          <button id="memo-m-save" class="primary">저장</button>
+        </div>
       </div>
     </div>
 

@@ -461,13 +461,15 @@ body {
 }
 
 #ssh-list,
-#prompt-list {
+#prompt-list,
+#memo-list {
   flex: 1 1 auto;
   overflow-y: auto;
   padding: 6px;
 }
 #ssh-list.hidden,
-#prompt-list.hidden {
+#prompt-list.hidden,
+#memo-list.hidden {
   display: none;
 }
 
@@ -477,32 +479,10 @@ body {
   color: var(--accent);
 }
 
-/* 전역 메모 탭 */
-#memo-view {
-  flex: 1 1 auto;
-  display: flex;
-  padding: 6px;
-  min-height: 0;
-}
-#memo-view.hidden {
-  display: none;
-}
-#memo-text {
-  flex: 1 1 auto;
-  width: 100%;
-  resize: none;
-  padding: 10px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text);
-  font-size: 13px;
-  line-height: 1.6;
-  outline: none;
-  font-family: 'MesloLGS NF', Menlo, 'SF Mono', Monaco, monospace;
-}
-#memo-text:focus {
-  border-color: var(--accent);
+/* 메모 항목 마커 */
+.memo-item .ssh-name::before {
+  content: '🗒';
+  color: var(--accent);
 }
 
 .ssh-item {
@@ -579,8 +559,21 @@ body {
 #prompt-modal-overlay.hidden {
   display: none;
 }
+#memo-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#memo-modal-overlay.hidden {
+  display: none;
+}
 #modal,
-#prompt-modal {
+#prompt-modal,
+#memo-modal {
   width: 380px;
   background: #252537;
   border: 1px solid var(--border);

@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld('termix', {
   loadPrompts: () => ipcRenderer.invoke('prompts:load'),
   savePrompts: (list) => ipcRenderer.send('prompts:save', list),
   loadHistory: () => ipcRenderer.invoke('history:commands'),
+  checkUpdate: () => ipcRenderer.invoke('update:check'),
+  openExternal: (url) => ipcRenderer.send('open:external', url),
   loadProjects: () => ipcRenderer.invoke('projects:load'),
   saveProjects: (list) => ipcRenderer.send('projects:save', list),
   write: (id, data) => ipcRenderer.send('session:write', { id, data }),

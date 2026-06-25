@@ -1,10 +1,14 @@
 'use strict';
 
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+const https = require('https');
 const pty = require('node-pty');
+
+// 업데이트 확인 대상 레포 (GitHub Releases)
+const REPO = 'choral7451/termix';
 
 // 프로젝트 구성(이름·경로) 영속화 파일
 const storeFile = () => path.join(app.getPath('userData'), 'projects.json');
@@ -203,6 +207,50 @@ ipcMain.handle('history:commands', () => {
     }
   }
   return out.slice(0, 3000);
+});
+
+// --- 업데이트 확인 (GitHub Releases 최신 버전) ---
+function fetchLatestRelease() {
+  return new Promise((resolve) => {
+    const req = https.request(
+      {
+        hostname: 'api.github.com',
+        path: `/repos/${REPO}/releases/latest`,
+        method: 'GET',
+        headers: { 'User-Agent': 'Termix-Updater', Accept: 'application/vnd.github+json' },
+        timeout: 8000,
+      },
+      (res) => {
+        let data = '';
+        res.on('data', (c) => (data += c));
+        res.on('end', () => {
+          try {
+            const json = JSON.parse(data);
+            if (json && json.tag_name) resolve({ tag: json.tag_name, url: json.html_url });
+            else resolve(null);
+          } catch (_) {
+            resolve(null);
+          }
+        });
+      }
+    );
+    req.on('error', () => resolve(null));
+    req.on('timeout', () => {
+      req.destroy();
+      resolve(null);
+    });
+    req.end();
+  });
+}
+
+ipcMain.handle('update:check', async () => {
+  const latest = await fetchLatestRelease();
+  return { current: app.getVersion(), latest };
+});
+
+// --- 외부 링크 열기(기본 브라우저) ---
+ipcMain.on('open:external', (_event, url) => {
+  if (typeof url === 'string' && /^https:\/\//.test(url)) shell.openExternal(url);
 });
 
 // --- 프로젝트 작업 폴더 선택 ---

@@ -1331,6 +1331,42 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
+// ===== 업데이트 알림 (GitHub Releases 최신 버전 확인) =====
+// "v0.2.0" vs "0.1.0" 형태를 비교. a 가 더 크면 1.
+function compareVersion(a, b) {
+  const pa = String(a).replace(/^v/, '').split('.').map((n) => parseInt(n, 10) || 0);
+  const pb = String(b).replace(/^v/, '').split('.').map((n) => parseInt(n, 10) || 0);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const x = pa[i] || 0;
+    const y = pb[i] || 0;
+    if (x > y) return 1;
+    if (x < y) return -1;
+  }
+  return 0;
+}
+
+function showUpdateBanner(tag, url) {
+  const banner = document.getElementById('update-banner');
+  document.getElementById('update-text').textContent = `새 버전 ${tag} 이(가) 있습니다`;
+  const dl = document.getElementById('update-download');
+  dl.onclick = () => {
+    window.termix.openExternal(url);
+    banner.classList.add('hidden');
+  };
+  document.getElementById('update-dismiss').onclick = () => banner.classList.add('hidden');
+  banner.classList.remove('hidden');
+}
+
+async function checkForUpdate() {
+  try {
+    const r = await window.termix.checkUpdate();
+    if (!r || !r.latest || !r.latest.tag) return;
+    if (compareVersion(r.latest.tag, r.current) > 0) {
+      showUpdateBanner(r.latest.tag, r.latest.url || `https://github.com/choral7451/termix/releases/latest`);
+    }
+  } catch (_) {}
+}
+
 // ===== 시작 =====
 (async function init() {
   // 저장된 SSH 접속 목록 복원
@@ -1383,4 +1419,7 @@ window.addEventListener('keydown', (e) => {
     persist();
     selectProject(proj.id);
   }
+
+  // 시작 후 백그라운드로 새 버전 확인(실패해도 조용히 무시)
+  checkForUpdate();
 })();
